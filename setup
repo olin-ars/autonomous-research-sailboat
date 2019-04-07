@@ -48,7 +48,7 @@ echo "export PYTHONPATH=\$PYTHONPATH:$repo_root" >> "$repo_root/../.virtualenvs/
 
 # Add a shortcut to activate the virtual environment
 venv_activate=$repo_root/../../.virtualenvs/oars/bin/activate
-echo "alias useoars=\"source $venv_activate\"" >> $HOME/.bashrc
+echo "alias useoars=\"source $venv_activate && cd $repo_root\"" >> $HOME/.bashrc
 
 # Load all environment variables, aliases, etc
 source $HOME/.bashrc
