@@ -69,7 +69,9 @@ echo Python configuration complete
 
 echo Building the catkin workspace...
 
-cd ../../
+cd ../
+catkin_create_pkg oars_pkg std_msgs rospy roscpp
+cd ../
 catkin_make
 
 # Load the catkin workspace stuff when loading the virtual environment
@@ -103,10 +105,10 @@ while [ $answer_valid != true ]; do
   echo What would you like to do?
   echo   a\) Install PyCharm and configure with ROS \(recommended\)
   echo   b\) Configure an existing PyCharm installation for use with ROS
-  echo   c\) Do nothing related to PyCharm
+  echo   c\) Do nothing related to PyCharm \(DEFAULT\)
   echo -n "Your answer: "
   read answer
-  if [ $answer == "A" ] || [ $answer == "a" ] || [ $answer == "" ]
+  if [ $answer == "A" ] || [ $answer == "a" ]
   then
     answer_valid=true
     install_pycharm=true
@@ -115,7 +117,7 @@ while [ $answer_valid != true ]; do
   then
     answer_valid=true
     configure_pycharm_launcher=true
-  elif [ $answer == "C" ] || [ $answer == "c" ]
+  elif [ $answer == "C" ] || [ $answer == "c" ] || [ $answer == "" ]
   then
     answer_valid=true
   else
@@ -155,12 +157,11 @@ then
   echo PyCharm launcher configuration complete
 fi
 
+source ~/.bashrc
+source $venv_activate
+
 echo \n\n
-echo "Setup complete. Please run the following line to make ROS available in the current terminal window:"
-echo
-echo "   source ~/.bashrc && source $venv_activate"
-echo
-echo "Any time you open a new terminal and would like to run ROS commands in it, run the following:"
+echo "Setup complete. Any time you open a new terminal and would like to run ROS commands in it, run the following:"
 echo
 echo "   useoars"
 echo

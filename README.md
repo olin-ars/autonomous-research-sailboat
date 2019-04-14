@@ -7,10 +7,10 @@ In order to get a new development machine up and running, simply do the followin
 on a computer running Ubuntu 16.04:
 
   0) Open a terminal and optionally create a folder for OARS in your home directory and `cd` into it.
-  1) Run `mkdir -p /catkin_ws/src && cd /catkin_ws/src`
+  1) Run `mkdir -p catkin_ws/src && cd catkin_ws/src`
   2) Clone the repo by running `git clone https://github.com/olin-robotic-sailing/oars_2019.git`
-  3) Run `cd oars_2019 && bash setup` to run the setup script
-  4) Run the command it says to run afterwards
+  3) Run `cd oars_2019 && bash ./setup` to run the setup script
+  4) Run the command it says to run at the end of the setup
 
 The setup script will walk you through installing ROS and setting it up with Python
 in a way that will not conflict with other Python configurations (e.g. Anaconda).
