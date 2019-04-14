@@ -20,8 +20,6 @@ class ObstacleReporter:
             ''' Initializes a publisher. You can create multiple of these, and a given class can have publishers and/or subscribers. '''
             self.pub = rospy.Publisher('/boat/obstacles', ObjFrame, queue_size = 1)
 
-            print('reporter node initialized.')
-
             '''makeDummyObstacle is the method which carries out the main job of this class. It also triggers data publishing. '''
             r = rospy.Rate(1)
             while not rospy.is_shutdown():
