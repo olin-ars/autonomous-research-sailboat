@@ -69,7 +69,7 @@ echo Python configuration complete
 
 echo Building the catkin workspace...
 
-catkin_create_pkg oars_pkg std_msgs rospy roscpp
+catkin_create_pkg oars_pkg std_msgs rospy roscpp geometry_msgs sensor_msgs message_generation
 cd ../../
 catkin_make
 
@@ -155,6 +155,8 @@ then
   sed -i 's/Exec="/Exec=bash -i -c "useoars \&\& /' $HOME/.local/share/applications/jetbrains-pycharm*.desktop
   echo PyCharm launcher configuration complete
 fi
+
+source $HOME/.bashrc
 
 echo \n\n
 echo "Setup complete. Any time you open a new terminal and would like to run ROS commands in it, run the following:"
