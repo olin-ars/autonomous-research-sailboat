@@ -1,5 +1,5 @@
 # OARS Software Team Repository
-## A proposed new structure for the OARS software repository
+### A proposed new structure for the OARS software repository
 
 # Setting up a Dev Environment
 
@@ -21,5 +21,19 @@ PyCharm installation path (this will accept the default).
 
 After you have done this, you should try the ROS demo in `oars_pkg/ROSdemo` to make sure your environment and package are configured correctly and to learn how to run a ROS node.
 
+# What is all this stuff?
+
+If this is your first time here, here are the main attractions in our repo. This is all very new and very much a work in progress, so there might not be much to see in some folders.
+
+- `oars_pkg/`  ROS nodes and code to run the boat. Your work probably goes here.
+ - `ROSdemo/`  information and code for playing with and learning about ROS
+ - `launch/`  ROS launch scripts for starting multiple nodes
+ - `msg/`  custom message types for ROS
+ - `nav_and_controls/`  nodes relating to navigation and boat controls
+ - `sensing/`  nodes relating to sensors
+ - `boat_class.py`  the boat object which relies on sensing, navigation and controls
+- `run_boat.py`  main program to start and run a boat
+- `setup`  setup script for creating your own dev environment - see the README
+- `setup_root`  version of `setup` to run as root (without sudo)
 
 ** will be updated in the future with more information.
