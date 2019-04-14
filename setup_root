@@ -69,9 +69,8 @@ echo Python configuration complete
 
 echo Building the catkin workspace...
 
-cd ../
 catkin_create_pkg oars_pkg std_msgs rospy roscpp
-cd ../
+cd ../../
 catkin_make
 
 # Load the catkin workspace stuff when loading the virtual environment
@@ -152,13 +151,10 @@ fi
 if [ $configure_pycharm_launcher == true ]
 then
   echo Reconfiguring PyCharm launcher to work with ROS...
-  # Launch PyCharm usin bash after loading the virtual environment
+  # Launch PyCharm using bash after loading the virtual environment
   sed -i 's/Exec="/Exec=bash -i -c "useoars \&\& /' $HOME/.local/share/applications/jetbrains-pycharm*.desktop
   echo PyCharm launcher configuration complete
 fi
-
-source ~/.bashrc
-source $venv_activate
 
 echo \n\n
 echo "Setup complete. Any time you open a new terminal and would like to run ROS commands in it, run the following:"
