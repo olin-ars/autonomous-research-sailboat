@@ -13,7 +13,7 @@ Next, go to the line that says `generate_messages` and uncomment that whole bloc
 `cd` into `oars_ws` and run `catkin_make`. If it gives you any errors, look back at `CMakeLists.txt` and make sure you didn't make any typos or syntax errors, and that you properly saved the file. If starting ROS and starting the node in the next step doesn't work, try restarting the terminal.
 
 ## Starting ROS
-Remember to run `useoars` in each new terminal window to activate the virtual environment and quickly move into your OARS directory. To start ROS, run `roscore`. Then, open a new terminal tab (`Ctrl+Shift+T`) and run `rosrun oars_pkg random_send.py`. The node should start and print that it is publishing messages. You can use `Ctrl+C` to stop the program in any of these terminal tabs.
+Remember to run `useoars` in each new terminal window to activate the virtual environment and quickly move into your OARS directory. To start ROS, run `roscore`. Then, open a new terminal tab (`Ctrl+Shift+T`) and run `rosrun oars_pkg random_send.py`. For new files, you will need to run `chmod +x /path/to/file.name` to make the node executable. The node should start and print that it is publishing messages. You can use `Ctrl+C` to stop the program in any of these terminal tabs.
 
 ## Listening and `echo`
 Open a new terminal tab and run `rosrun oars_pkg random_recv.py` to run the listener node. If you open another terminal and run `rostopic echo /boat/obstacles`, you can see the data being published by `random_send.py` in real time, without a listener node.
@@ -25,6 +25,7 @@ In general, the workflow for making changes in ROS is:
 - Add/edit source files in `oars_pkg` (nodes, messages, etc.)
 - Update `oars_pkg/CMakeLists.txts` to look for new files or dependencies
 - `cd` into `oars_ws` and run `catkin_make`
+- For new node files: run `chmod +x /path/to/file.name`
 
 The common commands for starting ROS nodes are:
 - `roscore`: start ROS
