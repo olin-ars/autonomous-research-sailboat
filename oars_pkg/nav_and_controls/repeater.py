@@ -1,5 +1,13 @@
 #!/usr/bin/env python
 
+"""
+Node to control other nodes. Subscribes to command_center.py and repeatedly
+publishes commands from it to the relevant topics. Values of topics not set by
+command_center.py are not published.
+
+@Authors: Jane Sieving
+"""
+
 import rospy
 from std_msgs.msg import Float32
 from geometry_msgs.msg import Point32
@@ -7,7 +15,7 @@ from geometry_msgs.msg import Point32
 class Repeater:
     def __init__(self, usingRos = True):
         self.usingRos = True if rospy is not None and usingRos else False
-
+        # Initialize each message. These won't publish if unset.
         self.cp_msg = None
         self.tp_msg = None
         self.ch_msg = None
@@ -19,7 +27,7 @@ class Repeater:
         if self.usingRos:
             rospy.init_node('command', anonymous = True)
             print('repeater node initialized.')
-
+            # Create a subscriber to the command topic for each value
             self.sub_current_position = rospy.Subscriber('cmd_cp', Point32, self.recv_cp, queue_size = 1)
             self.sub_target_position = rospy.Subscriber('cmd_tp', Point32, self.recv_tp, queue_size = 1)
             self.sub_current_heading = rospy.Subscriber('cmd_ch', Float32, self.recv_ch, queue_size = 1)
@@ -28,6 +36,7 @@ class Repeater:
             self.sub_rel_wind_dir = rospy.Subscriber('cmd_rw', Float32, self.recv_rw, queue_size = 1)
             self.sub_wind_velocity = rospy.Subscriber('cmd_wv', Float32, self.recv_wv, queue_size = 1)
 
+            # Create a publisher to the corresponding topic for each value
             self.pub_current_position = rospy.Publisher('current_position', Point32, queue_size = 1)
             self.pub_target_position = rospy.Publisher('target_position', Point32, queue_size = 1)
             self.pub_current_heading = rospy.Publisher('current_heading', Float32, queue_size = 1)
@@ -38,9 +47,11 @@ class Repeater:
 
             r = rospy.Rate(1)
             while not rospy.is_shutdown():
+                # publish whichever values have been set
                 self.publishCommands()
                 r.sleep()
 
+    # whenever a command is received, update the message being published by the repeater
     def recv_cp(self, msg):
         self.cp_msg = msg
 
@@ -65,6 +76,7 @@ class Repeater:
     def publishCommands(self):
         n = 0
         if self.usingRos:
+            # Publish whichever messages have been set
             if self.cp_msg != None:
                 self.pub_current_position.publish(self.cp_msg); n+=1
             if self.tp_msg != None:

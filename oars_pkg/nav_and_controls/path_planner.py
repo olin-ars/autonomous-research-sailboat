@@ -1,3 +1,11 @@
+"""
+This program implements the short course routing algorithm described in Section 5.1 of Roland Stelzer's Autonomous
+Sailboat Navigation paper. This algorithm uses a polar efficiency function to determine the efficiency of all possible
+angles that a boat can turn, and then compares the efficiencies to determine the optimal boat heading.
+Read the paper here: https://www.dora.dmu.ac.uk/bitstream/handle/2086/7364/thesis-optimized-300dpi.pdf
+@Authors: Duncan Mazza and Shreya Chowdhary
+"""
+
 import numpy as np
 from time import sleep
 from turtle import Turtle
