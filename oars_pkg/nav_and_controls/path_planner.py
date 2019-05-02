@@ -4,9 +4,9 @@ from turtle import Turtle
 
 
 def update_boat(boat, dir):
-    boat.setheading(dir)
-    boat.forward(4)
-    sleep(0.05)
+    boat.setheading(dir*180/np.pi)
+    boat.forward(2)
+    sleep(0.01)
     boat.position()
 
 
@@ -35,7 +35,7 @@ def target_draw_circle(target_pos, target_drawer):
 
 class ShortCoursePlanner:
 
-    def __init__(self, p_c=20):
+    def __init__(self, p_c=40):
         self.p_c = p_c  # The beating parameter (which controls the length of a tack)
 
     def _get_polar_efficiency(self, wind_angle, alpha):
@@ -52,7 +52,8 @@ class ShortCoursePlanner:
         mag = (1 - np.cos(alpha)) * (1 + 0.3 * np.cos(alpha)) / (1 - 0.5 * np.cos(alpha))
 
         # Return vector components as a numpy array
-        return np.array([mag * np.cos(angle), mag * np.sin(angle)])
+        res = np.array([mag * np.cos(angle), mag * np.sin(angle)])
+        return res
 
     def _get_optima(self, wind_angle, path):
         """
@@ -68,7 +69,8 @@ class ShortCoursePlanner:
             vt_max_l - max velocity on left side
         """
 
-        # print("Getting optima")
+        wind_angle *= np.pi/180
+
         # Initializing the right side and left side optimum wind angles
         windangle_max_r = wind_angle
         windangle_max_l = wind_angle
@@ -79,29 +81,29 @@ class ShortCoursePlanner:
 
         # Checks all alphas between 0 and 180 and calculates the theoretical speeds
         # to find an optimal heading for a starboard tack
-        for alpha in np.linspace(0, np.pi, 100):
+        for alpha in np.linspace(0, np.pi, 40):
 
             # Uses the polar effeciency function to calculcate the hypothetical velocity of the boat at that angle
             vb_hyp = self._get_polar_efficiency(wind_angle, alpha)
 
             # Projecting the max speed in the direction of the path
-            vt_test = np.dot(vb_hyp, path)
+            vt_test = np.dot(vb_hyp, path)/np.sqrt(path[0] ** 2 + path[1] ** 2)
 
             # velocities[alpha] = vt_test
 
             # Check if this velocity is the new max
             if vt_test > vt_max_r:
                 vt_max_r = vt_test
-                windangle_max_r = (wind_angle + alpha) % 2*np.pi
+                windangle_max_r = (wind_angle + alpha) % (2*np.pi)
 
         # Analogous to the starboard tack, but for a port tack
-        for alpha in np.linspace(np.pi, 2*np.pi, 100):
+        for alpha in np.linspace(np.pi, 2*np.pi, 40):
             vb_hyp = self._get_polar_efficiency(wind_angle, alpha)
-            vt_test = np.dot(vb_hyp, path)
+            vt_test = np.dot(vb_hyp, path)/np.sqrt(path[0] ** 2 + path[1] ** 2)
             # velocities[alpha] = vt_test
             if vt_test > vt_max_l:
                 vt_max_l = vt_test
-                windangle_max_l = (wind_angle + alpha) % 2*np.pi
+                windangle_max_l = (wind_angle + alpha) % (2*np.pi)
 
         return vt_max_r, vt_max_l, windangle_max_r, windangle_max_l
 
@@ -121,25 +123,25 @@ class ShortCoursePlanner:
         # Calculates the hysteresis factor
         n = 1 + (self.p_c / (abs(np.sqrt(path[0] ** 2 + path[1] ** 2))))
 
-
         # Choose the direction that is closest to the current boat heading
         r_diff = np.pi/2 - abs(abs(windangle_max_r - boat_heading) - np.pi/2)
         l_diff = np.pi/2 - abs(abs(windangle_max_l - boat_heading) - np.pi/2)
-        if r_diff < l_diff:
-            # Choose the faster velocity
-            if vt_max_r * n < vt_max_l:
+
+        # Choose the closer side, balancing with faster velocity
+        if r_diff < l_diff: # r is closer
+            if vt_max_r * n < vt_max_l: # l is significantly faster
                 new_boat_heading = windangle_max_l
             else:
-                new_boat_heading = windangle_max_r
-        else:
-            if vt_max_l * n < vt_max_r:
+                new_boat_heading = windangle_max_r # r is fast enough
+        else:               # l is closer
+            if vt_max_l * n < vt_max_r: # r is significantly faster
                 new_boat_heading = windangle_max_r
             else:
-                new_boat_heading = windangle_max_l
+                new_boat_heading = windangle_max_l # l is fast enough
 
         return new_boat_heading
 
-    def run(self, path, w, b_h, b_p):
+    def run(self, target, w, b_h, b_p):
         """
         This method directs the boat by using the boat's position and the target position to calculate the path
         and comparing the boat's heading to the wind heading to determine the most efficient way for the boat to get
@@ -152,17 +154,14 @@ class ShortCoursePlanner:
         """
 
         # Calculates the path of the boat
-        path = np.array(path) - np.array(b_p)
+        path = np.array(target) - np.array(b_p)
 
         # Runs the optimum function and compares the optima returned to determine the best direction for
         # boat to go
         vt_max_r, vt_max_l, windangle_max_r, windangle_max_l = self._get_optima(w, path)
-        new_dir = self._get_best_dir( vt_max_r, vt_max_l, windangle_max_r, windangle_max_l, path, b_h)
+        new_dir = self._get_best_dir( vt_max_r, vt_max_l, windangle_max_r, windangle_max_l, path, b_h * np.pi/180)
 
         return new_dir
-
-
-
 
 if __name__ == "__main__":
     # Initialize planner object
@@ -172,7 +171,8 @@ if __name__ == "__main__":
     # Initializes the boat's current direction, target path
     boat_curr_dir = 0
     # Initializes the list of waypoints (target positions)
-    target_list = [(0, 120)]
+    size = 200
+    target_list = [(0, size), (size, size), (0, 0), (size, 0), (size, -size), (0, -size), (0, 0)]
 
     # Draw the boat; initialize boat Turtle object
     boat, wind = draw_wind_boat(wind_dir, boat_curr_dir)
@@ -186,16 +186,8 @@ if __name__ == "__main__":
     for target_pos in target_list:
         target_draw_circle(target_pos, target_drawer)
 
-        path = np.array(target_pos) - np.array(boat.position())
-        print("Original Path: ", path)
-
-        if path[0] != 0:
-            path_angle = np.arctan(path[1] / path[0])
-        else:
-            path_angle = np.pi/2
-
-        print("Current Target: ", target_pos)
+        print("Main: Current Target: ", target_pos)
         while boat.distance(target_pos) > 5:  # update the boat position
-            boat_new_dir = planner.run(path, wind_dir, boat.heading(), boat.position())
-            print(boat_new_dir)
+            boat_new_dir = planner.run(target_pos, wind_dir, boat.heading(), boat.position())
+            print("Main: Boat new dir: ", boat_new_dir)
             update_boat(boat, boat_new_dir)
