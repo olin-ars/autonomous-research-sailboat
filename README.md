@@ -33,7 +33,7 @@ If this is your first time here, here are the main attractions in our repo. This
   - `nav_and_controls/`  nodes relating to navigation and boat controls
   - `sensing/`  nodes relating to sensors
   - `boat_class.py`  the boat object which relies on sensing, navigation and controls
-* `run_boat.py`  main program to start and run a boat
+* `run_boat.py`  template for a main program to start and run a boat. Use if useful.
 * `setup`  setup script for creating your own dev environment - see the README
 * `setup_root`  version of `setup` to run as root (without sudo)
 
