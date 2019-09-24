@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>oars_pkg</name>
+  <version>0.0.0</version>
+  <description>The oars_pkg package</description>
+
+  <!-- One maintainer tag required, multiple allowed, one person per tag -->
+  <!-- Example:  -->
+  <maintainer email="oliner@olin.edu">Oliner DoLearn</maintainer>
+
+
+  <!-- One license tag required, multiple allowed, one license per tag -->
+  <!-- Commonly used license strings: -->
+  <!--   BSD, MIT, Boost Software License, GPLv2, GPLv3, LGPLv2.1, LGPLv3 -->
+	<!-- Whatever you choose, don't do any GPL license (LGPL included).-->
+  <license>CC-NC-SA-4.0</license>
+
+
+  <!-- Url tags are optional, but multiple are allowed, one per tag -->
+  <!-- Optional attribute type can be: website, bugtracker, or repository -->
+  <!-- Example: -->
+	<!-- Let's add the OARS website to here -->
+  <!-- <url type="website">http://wiki.ros.org/oars_pkg</url> -->
+
+
+  <!-- Author tags are optional, multiple are allowed, one per tag -->
+  <!-- Authors do not have to be maintainers, but could be -->
+  <!-- Example: -->
+  <author email="oliner@olin.edu">Oliner DoLearn</author>
+
+	<build_depend>message_generation</build_depend>
+  <build_export_depend>message_generation</build_export_depend>
+  <buildtool_depend>catkin</buildtool_depend>
+  <exec_depend>message_runtime</exec_depend>
+  <depend>geometry_msgs</depend>
+  <depend>joy</depend>
+  <depend>mavros</depend>
+  <depend>roscpp</depend>
+  <depend>rospy</depend>
+  <depend>sensor_msgs</depend>
+	<depend>std_msgs</depend>
+
+
+  <!-- The export tag contains other, unspecified, tags -->
+  <export>
+    <!-- Other tools can request additional information be placed here -->
+
+  </export>
+</package>
