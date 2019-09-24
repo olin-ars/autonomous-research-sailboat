@@ -31,8 +31,8 @@ After you have done this, you should try the ROS demo in `oars_pkg/ROSdemo` to m
 
 If this is your first time here, here are the main attractions in our repo. This is all very new and very much a work in progress, so there might not be much to see in some folders.
  - `oars_ws`  ROS workspace solely for OARS. You can `cd` inside this and immediately run `catkin_make`.
-   - `build`  This is where all the compiled ROS node executables will be stored by default. Don't do work here.
-   - `devel`  This is the source code for the ROS building stuff. Don't do work here.
+   - `build`  This is where all the compiled ROS node executables will be stored by default. Don't do work here. This folder will only appear after running `catkin_make`.
+   - `devel`  This is the source code for the ROS building stuff. Don't do work here. This folder will only appear after running `catkin_make`.
    - `src`  The source code folder of the workspace. Do your ROS projects in here.
      - `oars_pkg/`  ROS nodes and code to run the boat. Your work probably goes here. *
        - `ROSdemo/`  information and code for playing with and learning about ROS
