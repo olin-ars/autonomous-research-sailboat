@@ -20,7 +20,7 @@ environment, which is great for debugging, and configure it for use with ROS.
 Just enter your password when it asks for it and press Enter when it asks for the
 PyCharm installation path (this will accept the default).
 
-## Docker Approach
+## Docker Approach (If you're comfortable with basic terminal commands)
 ### For Ubuntu systems
 Install Docker following the steps on https://docs.docker.com/install/linux/docker-ce/ubuntu/.
 
