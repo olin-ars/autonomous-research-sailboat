@@ -20,13 +20,13 @@ environment, which is great for debugging, and configure it for use with ROS.
 Just enter your password when it asks for it and press Enter when it asks for the
 PyCharm installation path (this will accept the default).
 
-## Docker Approach
+## Docker Approach (If you're comfortable with basic terminal commands)
  - Clone the repo: `git clone https://github.com/olin-robotic-sailing/autonomous-research-sailboat.git`
  - `cd` into the folder to load the convenience start-up commands onto your machine:
    - `cd autonomous-research-sailboat/docker_setup/`
  - Run the setup script! `bash d_setup_linux.sh`
 
-You're now ready to use Docker! Realize that using Docker is a command-line heavy experience! It's somewhat like SSH-ing into things - your main interface with the Docker container is the terminal. That means processes that occupy your terminal while running become very annoying! Fortunately, Docker allows multiple terminals to connect to an active container - using special commands. To avoid having to pull up new terminals for every new connection to Docker, we suggest using `tmux`. It's a powerful tool for having multiple sessions within the same terminal screen (and to have them run even after closing the terminal).
+You're now ready to use Docker! **Realize that using Docker is a command-line heavy experience!** It's somewhat like SSH-ing into things - your main interface with the Docker container is the terminal. That means processes that occupy your terminal while running become very annoying! Fortunately, Docker allows multiple terminals to connect to an active container - using special commands. To avoid having to pull up new terminals for every new connection to Docker, we suggest using `tmux`. It's a powerful tool for having multiple sessions within the same terminal screen (and to have them run even after closing the terminal).
 
 Why use Docker when it's somewhat complicated? Because of something called containers. Think of Docker as a better and faster VM - it allows you to instantiate prebuilt *images* of a working computer. You'll use one such image for doing OARS work - that image will be the base from which we'll build upon. Every time you instantiate the image, it creates a container - data made/installed/screwed up within the container doesn't affect your main system (for the most part - there is one technicality). This makes it quite useful - often, we'll make/compile/install something foolish and break our computer. By using Docker, the only thing broken will be our container, and not our actual computer. Furthermore, Docker images are really quick to start up again - meaning you can easily replace the container whenever things go awry. It also lets you use tools meant for other OS's. Ex. we are using ROS Melodic, which requires Ubuntu 18.04 - even if you are running Ubuntu 16.04 or some other OS, you can use a Docker image to get access to Ubuntu 18.04, and thus ROS Melodic.
 
