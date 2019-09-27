@@ -1,0 +1,104 @@
+#!/bin/bash
+
+ug="Usage: docker_dock [TAGS]\n\nREQUIRED TAGS:\n\n"
+
+us="\t-s -> Script style:\n\t-------------------\n\tStyle 1 | Initialize the docker container\n\tStyle 2 | Connect to the existing docker container\n\n"
+
+un="\t-n -> Container name:\n\t---------------------\n\tString holding name of container to be initialized or connected to\n\n"
+
+ui="\t-i -> Docker image name:\n\t------------------------\n\tString holding name of the Docker image to be built \n\tThe name MUST include both repository name & tag, i.e. ubuntu:latest \n\tThis tag is only required when the value ascribed to tag -s is 1.\n\n"
+
+uv="\t-v -> Volume name:\n\t------------------\n\tString holding name of the Docker volume to be mounted to the container\n\tCan be the name of a new volume or an existing volume\n\tThis prevents work done during the session from being lost\n\tWhen not provided, defaults to temp volume named trashV\n\n"
+
+uO="OPTIONAL TAGS\n\n"
+
+uc="\t-c -> Command to pass into the Docker image upon startup.\n"
+ur="\t-r -> ROS_HOSTNAME env value: Set to localhost by default.\n"
+uh="\t-h -> HOST env value: Set to localhost by default. Useful during remote sessions, etc.\n"
+
+u="$ug$us$un$ui$uv$uO$uc$ur$uh\n"
+
+usage() { printf "$u" 1>&2; exit 1; }
+
+while getopts ":s:n:i:v:r:h:c:" o; do
+    case "${o}" in
+        s)
+            s=${OPTARG}
+            ((s == 1 || s  == 2)) || usage
+            ;;
+        n)
+            n=${OPTARG}
+            ;;
+				i)
+						i=${OPTARG}
+						;;
+				v)
+						v=${OPTARG}
+						;;
+				c)
+						c=${OPTARG}
+						;;
+				r)
+						r=${OPTARG}
+						;;
+				h)
+						h=${OPTARG}
+						;;
+        *)
+  pp          usage
+            ;;
+    esac
+done
+shift $((OPTIND-1))
+
+if [ -z "${s}" ] || [ -z "${n}" ]; then
+    usage
+fi
+
+if [ s == 1 ] && [ -z "${i}" ]; then
+    usage
+fi
+
+if [ -z "${v}" ]; then
+		v=trashV
+fi
+
+if [ -z "${r}" ]; then
+    r=localhost
+fi
+
+if [ -z "${h}" ]; then
+    h=localhost
+fi
+
+if [ "${s}" == 1 ]; then
+		w=$(docker inspect $i | jq '.[0] | .ContainerConfig.WorkingDir' | tr -d '"')
+		if [ -z $w ]; then
+				w=/home/$USER
+		fi
+    xhost +local:
+    docker run -it --net=host \
+	   -e DISPLAY=$DISPLAY \
+	   -e QT_GRAPHICSSYSTEM=native \
+	   -e ROS_HOSTNAME=$r \
+	   -e HOST=$h \
+		 -e HOME=$w \
+	   --workdir=$w/volumes \
+	   -v $v:$w/volumes \
+	   -v "/home/$USER/:$w/host/:rw" \
+	   -v "/media/$USER/:/media/$USER/:rw" \
+		 -v "/dev/:/dev/:rw" \
+	   --name=$n \
+	   $i $c
+else
+    xhost +local:
+    docker start $n
+    docker attach $n
+fi
+
+#	   -v "/tmp/.X11-unix:/tmp/.X11-unix" \
+#	   -v "/etc/group:/etc/group:ro" \
+#	   -v "/etc/passwd:/etc/passwd:ro" \
+#	   -v "/etc/shadow:/etc/shadow:ro" \
+#	   -v "/etc/sudoers.d:/etc/sudoers.d:ro" \
+#	   -v "/home/$USER/:/home/$USER/:ro" \
