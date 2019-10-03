@@ -42,7 +42,7 @@ class Repeater:
             self.pub_current_heading = rospy.Publisher('current_heading', Float32, queue_size = 1)
             self.pub_target_heading = rospy.Publisher('target_heading', Float32, queue_size = 1)
             self.pub_abs_wind_dir = rospy.Publisher('abs_wind_dir', Float32, queue_size = 1)
-            self.pub_rel_wind_dir = rospy.Publisher('abs_wind_dir', Float32, queue_size = 1)
+            self.pub_rel_wind_dir = rospy.Publisher('rel_wind_dir', Float32, queue_size = 1)
             self.pub_wind_velocity = rospy.Publisher('wind_velocity', Float32, queue_size = 1)
 
             r = rospy.Rate(1)
