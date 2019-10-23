@@ -17,8 +17,9 @@ import rospy
 from std_msgs.msg import Float32
 from geometry_msgs.msg import Point32
 
+
 class CommandCenter:
-    def __init__(self, usingRos = True):
+    def __init__(self, usingRos=True):
         self.usingRos = True if rospy is not None and usingRos else False
         # Initialize each message. These won't publish if unset.
         self.cp_msg = None
@@ -30,22 +31,23 @@ class CommandCenter:
         self.wv_msg = None
 
         if self.usingRos:
-            rospy.init_node('command', anonymous = True)
+            rospy.init_node('command', anonymous=True)
             print('command node initialized.')
             # Create a publisher to the command topic for each value
-            self.pub_current_position = rospy.Publisher('cmd_cp', Point32, queue_size = 1)
-            self.pub_target_position = rospy.Publisher('cmd_tp', Point32, queue_size = 1)
-            self.pub_current_heading = rospy.Publisher('cmd_ch', Float32, queue_size = 1)
-            self.pub_target_heading = rospy.Publisher('cmd_th', Float32, queue_size = 1)
-            self.pub_abs_wind_dir = rospy.Publisher('cmd_aw', Float32, queue_size = 1)
-            self.pub_rel_wind_dir = rospy.Publisher('cmd_rw', Float32, queue_size = 1)
-            self.pub_wind_velocity = rospy.Publisher('cmd_wv', Float32, queue_size = 1)
+            self.pub_current_position = rospy.Publisher('cmd_cp', Point32, queue_size=1)
+            self.pub_target_position = rospy.Publisher('cmd_tp', Point32, queue_size=1)
+            self.pub_current_heading = rospy.Publisher('cmd_ch', Float32, queue_size=1)
+            self.pub_target_heading = rospy.Publisher('cmd_th', Float32, queue_size=1)
+            self.pub_abs_wind_dir = rospy.Publisher('cmd_aw', Float32, queue_size=1)
+            self.pub_rel_wind_dir = rospy.Publisher('cmd_rw', Float32, queue_size=1)
+            self.pub_wind_velocity = rospy.Publisher('cmd_wv', Float32, queue_size=1)
 
             while not rospy.is_shutdown():
                 # wait for commands to send at the command line
                 self.getCommands()
 
     def getCommands(self):
+        # example: > cp=0,0 tp=200,200 ch=90
         # get input
         line = raw_input('> ')
         # split into individual commands, and handle each one
@@ -54,7 +56,7 @@ class CommandCenter:
             # instr[0] is the value name to set, instr[1] is its value
             instr = command.split('=')
 
-            if instr[0] in ['current_position', 'curr_pos', 'cp']: # check if command matches
+            if instr[0] in ['current_position', 'curr_pos', 'cp']:  # check if command matches
                 values = instr[1].split(',')                       # split x and y coords
                 if len(values) != 2:                               # make sure 2 were provided
                     print("Wrong number of arguments for current_position: expected 2.\n")
@@ -62,7 +64,7 @@ class CommandCenter:
                 x = float(values[0])
                 y = float(values[1])
                 print("current_position set to (%f, %f)." % (x, y))
-                self.cp_msg = Point32(x, y, 0) # create a message and set it in the CommandCenter
+                self.cp_msg = Point32(x, y, 0)  # create a message and set it in the CommandCenter
 
             elif instr[0] in ['target_position', 'target_pos', 'tp']:
                 values = instr[1].split(',')
@@ -106,21 +108,29 @@ class CommandCenter:
         n = 0
         if self.usingRos:
             # Publish whichever messages have been set
-            if self.cp_msg != None:
-                self.pub_current_position.publish(self.cp_msg); n+=1
-            if self.tp_msg != None:
-                self.pub_target_position.publish(self.tp_msg); n+=1
-            if self.ch_msg != None:
-                self.pub_current_heading.publish(self.ch_msg); n+=1
-            if self.th_msg != None:
-                self.pub_target_heading.publish(self.th_msg); n+=1
-            if self.aw_msg != None:
-                self.pub_abs_wind_dir.publish(self.aw_msg); n+=1
-            if self.rw_msg != None:
-                self.pub_rel_wind_dir.publish(self.rw_msg); n+=1
-            if self.wv_msg != None:
-                self.pub_wind_velocity.publish(self.wv_msg); n+=1
+            if self.cp_msg is not None:
+                self.pub_current_position.publish(self.cp_msg)
+                n += 1
+            if self.tp_msg is not None:
+                self.pub_target_position.publish(self.tp_msg)
+                n += 1
+            if self.ch_msg is not None:
+                self.pub_current_heading.publish(self.ch_msg)
+                n += 1
+            if self.th_msg is not None:
+                self.pub_target_heading.publish(self.th_msg)
+                n += 1
+            if self.aw_msg is not None:
+                self.pub_abs_wind_dir.publish(self.aw_msg)
+                n += 1
+            if self.rw_msg is not None:
+                self.pub_rel_wind_dir.publish(self.rw_msg)
+                n += 1
+            if self.wv_msg is not None:
+                self.pub_wind_velocity.publish(self.wv_msg)
+                n += 1
             print("%d commands published." % n)
+
 
 if __name__ == '__main__':
     CommandCenter()
