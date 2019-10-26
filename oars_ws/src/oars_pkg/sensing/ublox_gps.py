@@ -59,8 +59,8 @@ class Ublox(object):
 
         :return: None
         """
-        pub = rospy.Publisher('position', Point32, queue_size=0)
-        rospy.init_node('position', anonymous=True)
+        pub = rospy.Publisher('current_position', Point32, queue_size=0)
+        rospy.init_node('current_position', anonymous=True)
         rate = rospy.Rate(10)  # 10hz
         while not rospy.is_shutdown():
             # repeats the process in the init function over and over again
