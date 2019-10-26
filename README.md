@@ -7,6 +7,8 @@ We use Docker Containers to maintain a sane and consistent environment. Please i
 
 If your operating system is not listed, try Googling a solution. Also, though we'd like to, we're not quite ready to handle Docker on Windows quite yet - if you can contribute some knowledge towards this, that'd be amazing, and highly appreciated.
 
+You also need to install a tool called `jq`, which is required by our setup scrpit. It is a lightweight and flexible command-line JSON processor that allows you to slice, filter, map, and transform structured data. It is avaliable on most platforms, and can be installed on Ubuntu via `sudo apt-get install jq`.
+
 You're now ready to use Docker! Docker's a pretty poweful tool used by many corporations, with numerous capabilities and features. It's both amazing and pretty overwhelming when getting started, so to help you get used to it, we've provided you some convenience commands. To get those loaded in, as well as the repo downloaded, do the following steps:
  - Clone the repo: `git clone https://github.com/olin-robotic-sailing/autonomous-research-sailboat.git`
  - `cd` into the folder to load the convenience start-up commands onto your machine: `cd autonomous-research-sailboat/docker`
