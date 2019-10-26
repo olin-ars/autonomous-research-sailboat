@@ -5,7 +5,7 @@
 This code uses the Ublox usb gps
 Partially based on http://wiki.ros.org/rospy_tutorials/Tutorials/WritingPublisherSubscriber
 
-@Author(s): Jordan Crawford-O'Banner; small documentation revisions made by Duncan Mazza
+@author: Jordan Crawford-O'Banner; small documentation revisions made by Duncan Mazza
 """
 
 import rospy

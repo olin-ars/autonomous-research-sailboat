@@ -2,7 +2,7 @@
 This code recognizes Aruco markers, calculates their absolute position and heading, and then
 publishes that information to a ROS channel.
 
-@Author(s): Elias Gabriel
+@author: Elias Gabriel
 """
 import numpy as np
 import rospy
@@ -12,6 +12,9 @@ import cv2
 import cv2.aruco as aruco
 
 class ArucoGPS:
+
+    CAMERA_WIDTH = 640
+    CAMERA_HEIGHT = 480
 
     MIN_LAT = 42.283030
     MIN_LON = -71.313271
@@ -25,6 +28,11 @@ class ArucoGPS:
         self.has_screen = bool(os.environ.get('DISPLAY', None))
 
     def calculate_heading_position():
+        """
+        Locates an Aruco marker in the video frame and returns its heading and position. The marker
+        position is transformed from the camera coodinate space to an artifical latitudinal and
+        longitudinal range (based off the size of Lake Waban).
+        """
         _, frame = cap.read()
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         corners, _, _ = aruco.detectMarkers(gray, aruco_dict, parameters=params)
@@ -35,9 +43,10 @@ class ArucoGPS:
             facing = np.subtract(front, center)
             angle = np.rad2deg(np.arctan2(-facing[1], facing[0])) % 360
 
-            # TODO: Remap position to MIN/MAX GPS coords
+            center_x = ((center[0] / CAMERA_WIDTH) * (MAX_LAT - MIN_LAT)) + MIN_LAT
+            center_y = ((center[1] / CAMERA_HEIGHT) * (MAX_LON - MIN_LON)) + MIN_LON
 
-            return center, angle
+            return (center_x, center_y), angle
 
         return None, None
 
