@@ -3,13 +3,18 @@ The ROS workspace for commanding and controlling OARS' autonomous research vesse
 > Olin Aquatic Robotic Systems @ Olin College.
 
 ## Setting up a Dev Environment
-We use Docker Containers to maintain a sane and consistent environment. Please install Docker following the steps on https://hub.docker.com/search/?type=edition&offering=community for your operating system. If you're operating system is not listed, try Googling a solution.
+We use Docker Containers to maintain a sane and consistent environment. Please install Docker following the steps on https://hub.docker.com/search/?type=edition&offering=community for your operating system. If you are on a Linux system, you might want to consider going through the *Linux Post-Install Instructions*, also on the Docker website, so that you don't have to run `sudo` before every Docker command.
+
+If your operating system is not listed, try Googling a solution. Also, though we'd like to, we're not quite ready to handle Docker on Windows quite yet - if you can contribute some knowledge towards this, that'd be amazing, and highly appreciated.
+
+You also need to install a tool called `jq`, which is required by our setup scrpit. It is a lightweight and flexible command-line JSON processor that allows you to slice, filter, map, and transform structured data. It is avaliable on most platforms, and can be installed on Ubuntu via `sudo apt-get install jq`.
 
 You're now ready to use Docker! Docker's a pretty poweful tool used by many corporations, with numerous capabilities and features. It's both amazing and pretty overwhelming when getting started, so to help you get used to it, we've provided you some convenience commands. To get those loaded in, as well as the repo downloaded, do the following steps:
  - Clone the repo: `git clone https://github.com/olin-robotic-sailing/autonomous-research-sailboat.git`
  - `cd` into the folder to load the convenience start-up commands onto your machine: `cd autonomous-research-sailboat/docker`
  - Run the setup script! `bash d_setup_linux.sh`
  - Remove the repo (you don't need it anymore, since you'll be working on it from within the Docker container): `cd ../.. && rm -rf autonomous-research-sailboat`
+ - Download the Docker image custom built for OARS: `docker pull olinoars/ros:2019-2020`
 
 And you're done! To learn more about Docker, why we're suggesting it, and what commands we've given you/what they do, go [here](docker/USAGE.md).
 

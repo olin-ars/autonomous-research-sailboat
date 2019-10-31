@@ -5,7 +5,7 @@
 This code uses the Ublox usb gps
 Partially based on http://wiki.ros.org/rospy_tutorials/Tutorials/WritingPublisherSubscriber
 
-@Author(s): Jordan Crawford-O'Banner; small documentation revisions made by Duncan Mazza
+@author: Jordan Crawford-O'Banner; small documentation revisions made by Duncan Mazza
 """
 
 import rospy
@@ -59,8 +59,8 @@ class Ublox(object):
 
         :return: None
         """
-        pub = rospy.Publisher('position', Point32, queue_size=0)
-        rospy.init_node('position', anonymous=True)
+        pub = rospy.Publisher('current_position', Point32, queue_size=0)
+        rospy.init_node('current_position', anonymous=True)
         rate = rospy.Rate(10)  # 10hz
         while not rospy.is_shutdown():
             # repeats the process in the init function over and over again
