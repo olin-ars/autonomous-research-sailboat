@@ -4,7 +4,6 @@ import numpy as np
 import rospy
 from std_msgs.msg import Float32
 from geometry_msgs.msg import Point32
-import matplotlib.pyplot as plt
 
 
 class Boat:
@@ -33,7 +32,7 @@ class Boat:
         self.pub_position = rospy.Publisher("current_position", Point32, queue_size=1)
 
     def run(self):
-        r = rospy.Rate(3)
+        r = rospy.Rate(5)
         while not rospy.is_shutdown():
             while not self.target_reached:
                 r.sleep()
