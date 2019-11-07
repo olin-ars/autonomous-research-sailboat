@@ -9,16 +9,15 @@ RUN apt-get update && apt-get install -y \
 	bison flex build-essential g++ libfl-dev \
 	libxrender1 libxtst6 libxi6 \
 	autoconf gperf \
-	tcl-dev tk-dev libgtk2.0-dev
-
-RUN curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg \
-	&& install -o root -g root -m 644 packages.microsoft.gpg /usr/share/keyrings/ && \
-	sh -c 'echo "deb [arch=amd64 signed-by=/usr/share/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/vscode stable main" > /etc/apt/sources.list.d/vscode.list' \
-	&& apt -y install apt-transport-https && apt update && apt -y install code
-
-RUN apt install -y ros-melodic-mavros* ros-melodic-joy python-pip python-dev build-essential \
+	tcl-dev tk-dev libgtk2.0-dev software-properties-common \
+	ros-melodic-mavros* ros-melodic-joy ros-melodic-rosserial ros-melodic-rosserial-arduino \
+	python-pip python-dev build-essential \
 	python-rosinstall python-rosinstall-generator python-wstool \
 	&& pip install --upgrade python pip virtualenv && \
+	curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg \
+	&& install -o root -g root -m 644 packages.microsoft.gpg /usr/share/keyrings/ && \
+	sh -c 'echo "deb [arch=amd64 signed-by=/usr/share/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/vscode stable main" > /etc/apt/sources.list.d/vscode.list' \
+	&& apt -y install apt-transport-https && apt update && apt -y install code && \
 	apt autoremove && rm -rf /var/likb/apt/lists/*
 
 # setup entrypoint
@@ -28,7 +27,8 @@ RUN chmod +x /ros_entrypoint.sh
 RUN echo "root:octopus" | chpasswd
 RUN groupadd oars
 
-RUN useradd -g oars -ms /bin/bash oliner
+RUN useradd -g oars -ms /bin/bash oliner && \
+	usermod -G dialout oliner
 USER oliner
 WORKDIR /home/oliner
 
