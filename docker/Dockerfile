@@ -33,7 +33,7 @@ USER oliner
 WORKDIR /home/oliner
 
 RUN	cd /home/oliner && \
-	git clone https://github.com/olin-robotic-sailing/autonomous-research-sailboat.git && \
+	git clone https://github.com/olin-robotic-sailing/autonomous-research-sailboat.git /home/oliner/oars-research && \
 	rosdep update && mkdir /home/oliner/.virtualenvs && \
 	virtualenv -p python2.7 --system-site-packages /home/oliner/.virtualenvs/oars && \
 	echo "export PYTHONPATH=\$PYTHONPATH:catkin_ws" >> /home/oliner/.virtualenvs/oars/bin/activate && \
