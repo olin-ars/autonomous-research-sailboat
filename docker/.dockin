@@ -84,8 +84,8 @@ if [ "${s}" == 1 ]; then
 					 -e ROS_HOSTNAME=$r \
 					 -e HOST=$h \
 					 -e HOME=$w \
-					 --workdir=$w/volumes \
-					 -v $v:$w/volumes \
+					 --workdir="$w/oars-research" \
+					 -v "$v:$w/oars-research" \
 					 -v "/home/$USER/:$w/host/:rw" \
 					 -v "/media/$USER/:/media/$USER/:rw" \
 					 -v "/dev/:/dev/:rw" \
