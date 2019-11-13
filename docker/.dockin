@@ -45,7 +45,7 @@ while getopts ":s:n:i:v:r:h:c:" o; do
 						h=${OPTARG}
 						;;
         *)
-  pp          usage
+						pp          usage
             ;;
     esac
 done
@@ -76,29 +76,30 @@ if [ "${s}" == 1 ]; then
 		if [ -z $w ]; then
 				w=/home/$USER
 		fi
-    xhost +local:
-    docker run -it --net=host \
-	   -e DISPLAY=$DISPLAY \
-	   -e QT_GRAPHICSSYSTEM=native \
-	   -e ROS_HOSTNAME=$r \
-	   -e HOST=$h \
-		 -e HOME=$w \
-	   --workdir=$w/volumes \
-	   -v $v:$w/volumes \
-	   -v "/home/$USER/:$w/host/:rw" \
-	   -v "/media/$USER/:/media/$USER/:rw" \
-		 -v "/dev/:/dev/:rw" \
-	   --name=$n \
-	   $i $c
+    docker run -it \
+					 --network=host \
+					 --privileged \
+					 -e DISPLAY=$DISPLAY \
+					 -e QT_GRAPHICSSYSTEM=native \
+					 -e ROS_HOSTNAME=$r \
+					 -e HOST=$h \
+					 -e HOME=$w \
+					 --workdir=$w/volumes \
+					 -v $v:$w/volumes \
+					 -v "/home/$USER/:$w/host/:rw" \
+					 -v "/media/$USER/:/media/$USER/:rw" \
+					 -v "/dev/:/dev/:rw" \
+					 -v "/tmp/.X11-unix:/tmp/.X11-unix" \
+					 --name=$n \
+					 $i $c
 else
     xhost +local:
     docker start $n
     docker attach $n
 fi
 
-#	   -v "/tmp/.X11-unix:/tmp/.X11-unix" \
 #	   -v "/etc/group:/etc/group:ro" \
-#	   -v "/etc/passwd:/etc/passwd:ro" \
-#	   -v "/etc/shadow:/etc/shadow:ro" \
-#	   -v "/etc/sudoers.d:/etc/sudoers.d:ro" \
-#	   -v "/home/$USER/:/home/$USER/:ro" \
+		#	   -v "/etc/passwd:/etc/passwd:ro" \
+		#	   -v "/etc/shadow:/etc/shadow:ro" \
+		#	   -v "/etc/sudoers.d:/etc/sudoers.d:ro" \
+		#	   -v "/home/$USER/:/home/$USER/:ro" \
