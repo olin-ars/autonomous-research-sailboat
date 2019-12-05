@@ -23,7 +23,7 @@ class Headings:
 
         if self.usingRos:
             rospy.init_node('headings', anonymous = True)
-            print('Init heading node.')
+
             # Create a subscriber to the command topic for each value
             self.sub_ch = rospy.Subscriber('current_heading', Float32, self.recv_ch, queue_size = 1)
             self.sub_th = rospy.Subscriber('target_heading', Float32, self.recv_th, queue_size = 1)
@@ -36,14 +36,17 @@ class Headings:
             self.pub_sail_heading = rospy.Publisher('sail_position', Float32, queue_size = 1)
             self.pub_rudder_heading = rospy.Publisher('rudder_position', Float32, queue_size = 1)
 
-            r = rospy.Rate(10)
-            while not rospy.is_shutdown():
-                while self.target_reached == 0: # run if there's an unreached target
-                    # publish whichever values have been set
-                    self.publishCommands()
-                    r.sleep()
-                while self.target_reached != 0: # wait for a new goal
-                    pass
+    def run(self):
+        print('Sail/rudder control node initialized.')
+
+        r = rospy.Rate(10)
+        while not rospy.is_shutdown():
+            while self.target_reached == 0: # run if there's an unreached target
+                # publish whichever values have been set
+                self.publishCommands()
+                r.sleep()
+            while self.target_reached != 0: # wait for a new goal
+                pass
 
     def calc_rudder_angle(self, ref_angle, target_angle):
         rudder_angle_scale = .25 # degrees of rudder turn per desired turn
@@ -106,5 +109,6 @@ class Headings:
             self.pub_rudder_heading.publish(self.rudder_or)
 
 if __name__ == '__main__':
-    Headings()
+    h = Headings()
+    h.run()
     exit()

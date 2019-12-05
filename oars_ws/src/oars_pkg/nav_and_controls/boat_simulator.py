@@ -21,7 +21,7 @@ class Boat:
         self.xs = []
         self.ys = []
 
-        self.disp_wind()
+        print("WIND: %.0f" % self.wind_dir)
 
         rospy.init_node('boat_sim', anonymous=True)
 
@@ -35,8 +35,9 @@ class Boat:
         self.pub_position = rospy.Publisher("current_position", Point32, queue_size=1)
 
     def run(self):
-        r = rospy.Rate(10)
+        print('Boat sim node initialized.')
 
+        r = rospy.Rate(10)
         while not rospy.is_shutdown():
             while self.target_reached == 0:
                 self.update()
@@ -63,22 +64,12 @@ class Boat:
             self.pub_heading.publish(ch_msg)
             self.pub_position.publish(cp_msg)
 
-            # HANDLED BY PATH PLANNER
-            # path = self.tar_pos - self.curr_pos  # calculate the path
-            # if np.sqrt(path[0] ** 2 + path[1] ** 2) < 5:  # re-calculate whether target has been reached.
-            #     self.target_reached = 1
-
     def update_abs_wind(self, msg):
         self.wind_dir = msg.data
 
     def update_tar_pos(self, msg):
         x, y, _ = msg.x, msg.y, msg.z
         tp = np.array([x, y])
-        # HANDLED BY PATH PLANNER
-        # if (self.tar_pos != tp).any():  # if target changes, reset the target_reached flag
-        #     self.tar_pos = tp
-        #     self.target_reached = False
-        #     print("TARGET: %.2f, %.2f\t CURRENT: %.2f, %.2f" % (x, y, self.curr_pos[0], self.curr_pos[1]))
 
     def update_tar_heading(self, msg):
         # if no data is coming from rudder controller, just jump to desired heading
@@ -95,9 +86,6 @@ class Boat:
 
     def update_tar_status(self, msg):
         self.target_reached = msg.data
-
-    def disp_wind(self):
-        print("WIND: %.2f" % self.wind_dir)
 
 
 if __name__ == '__main__':

@@ -25,7 +25,7 @@ class ShortCoursePlanner:
         self.new_heading = None
         self.target_reached = -1  # -1 = no target, 0 = not reached, 1 = reached
         self.clock = 0
-        self.timeout = 100
+        self.timeout = 200
 
         rospy.init_node('path_planner', anonymous=True)
 
@@ -39,6 +39,8 @@ class ShortCoursePlanner:
 
 
     def run(self):
+        print("Path planner node initialized.")
+
         r = rospy.Rate(10)
         while not rospy.is_shutdown():
             self.publish_target_status()
@@ -50,6 +52,7 @@ class ShortCoursePlanner:
             if self.clock > self.timeout:  # give up
                 self.target_reached = -1  # admit defeat
                 self.tar_pos = np.array([None, None])  # burn your dreams
+                print("Timeout in path planner: target unset.", self.target_reached, self.tar_pos)
                 self.clock = 0  # wish you could start over
 
     def publish_target_status(self):
@@ -72,6 +75,7 @@ class ShortCoursePlanner:
             path = self.curr_pos - self.tar_pos
             if np.sqrt(path[0] ** 2 + path[1] ** 2) < 5:
                 self.target_reached = 1
+                print("Target reached in path planner!", self.target_reached)
 
     def set_tar_pos(self, msg):
         x, y, _ = msg.x, msg.y, msg.z
@@ -79,8 +83,11 @@ class ShortCoursePlanner:
         if (self.tar_pos != tp).any():  # if target changes, reset the target_reached flag
             self.tar_pos = tp
             self.target_reached = 0
+            print("Target changed in path planner!", self.target_reached)
         if (x, y) is (None, None): # if target is none, unset it
             self.target_reached = -1
+            print("Target reset in path planner.", self.target_reached)
+
 
     def _get_polar_efficiency(self, alpha):
         """
