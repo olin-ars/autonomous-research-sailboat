@@ -9,51 +9,65 @@ class Headings:
         self.usingRos = True if rospy is not None and usingRos else False
         # Initialize each message. These won't publish if unset. 
         # These are subscriber vars
-        self.ch_msg = None
-        self.th_msg = None
-        self.rw_msg = None
-        self.aw_msg = None
+        self.curr_heading = None
+        self.tar_heading = None
+        self.rel_wind = None
+        self.abs_wind = None
         # self.wv_msg = None
+
+        self.target_reached = -1  # -1 = no target, 0 = not reached, 1 = reached
 
         # Heading vars
         self.sail_or = None
         self.rudder_or = None
 
+        self.log = open("sail_rudder_control_log.txt", "a")
+
         if self.usingRos:
             rospy.init_node('headings', anonymous = True)
             print('Init heading node.')
             # Create a subscriber to the command topic for each value
-            self.sub_current_heading = rospy.Subscriber('current_heading', Float32, self.recv_ch, queue_size = 1)
-            self.sub_target_heading = rospy.Subscriber('target_heading', Float32, self.recv_th, queue_size = 1)
-            self.sub_rel_wind_dir = rospy.Subscriber('rel_wind_dir', Float32, self.recv_rw, queue_size = 1)
-            self.sub_abs_wind_dir = rospy.Subscriber('abs_wind_dir', Float32, self.recv_aw, queue_size = 1)
-            # self.sub_wind_velocity = rospy.Subscriber('cmd_wv', Float32, self.recv_wv, queue_size = 1)
+            self.sub_ch = rospy.Subscriber('current_heading', Float32, self.recv_ch, queue_size = 1)
+            self.sub_th = rospy.Subscriber('target_heading', Float32, self.recv_th, queue_size = 1)
+            self.sub_rw = rospy.Subscriber('rel_wind_dir', Float32, self.recv_rw, queue_size = 1)
+            self.sub_aw = rospy.Subscriber('abs_wind_dir', Float32, self.recv_aw, queue_size = 1)
+            self.sub_ts = rospy.Subscriber("target_status", Int8, self.update_tar_status, queue_size=1)
+            # self.sub_wv = rospy.Subscriber('cmd_wv', Float32, self.recv_wv, queue_size = 1)
 
             # Create a publisher to the corresponding topic for each value
-            self.pub_sail_heading = rospy.Publisher('sail_position', Float32, queue_size = 5)
-            self.pub_rudder_heading = rospy.Publisher('rudder_position', Float32, queue_size = 5)
+            self.pub_sail_heading = rospy.Publisher('sail_position', Float32, queue_size = 1)
+            self.pub_rudder_heading = rospy.Publisher('rudder_position', Float32, queue_size = 1)
+
+            # if self.log is not None:
+            self.log.write("_" * 80)
 
             r = rospy.Rate(10)
             while not rospy.is_shutdown():
-                # publish whichever values have been set
-                self.publishCommands()
-                r.sleep()
+                while self.target_reached == 0: # run if there's an unreached target
+                    # publish whichever values have been set
+                    self.publishCommands()
+                    r.sleep()
+                while self.target_reached != 0: # wait for a new goal
+                    pass
                 
+            if self.log is not None:
+                self.log.close()
+
     def calc_rudder_angle(self, ref_angle, target_angle):
         rudder_angle_scale = .25 # degrees of rudder turn per desired turn
         differences = [target_angle - ref_angle,
                        target_angle + 360 - ref_angle,
                        target_angle - ref_angle - 360]
         difference = min(differences, key=abs)
-        print("Returning rudder angle: %.2f" % (difference * rudder_angle_scale))
+        self.log_info("Returning rudder angle: %.2f" % (difference * rudder_angle_scale))
         return difference * rudder_angle_scale
     
     def calc_sail_angle(self):
         # figure out relative wind angle
-        if self.rw_msg is not None:
-            rel_wind = self.rw_msg
-        elif self.aw_msg is not None and self.ch_msg is not None:
-            rel_wind = (self.aw_msg - self.ch_msg) % 360
+        if self.rel_wind is not None:
+            rel_wind = self.rel_wind
+        elif self.abs_wind is not None and self.curr_heading is not None:
+            rel_wind = (self.abs_wind - self.curr_heading) % 360
         else:
             return
 
@@ -69,36 +83,43 @@ class Headings:
 
     # whenever a command is received, update the message being published by the repeater
     def recv_ch(self, msg):
-        print("CURRENT HEADING RECEIVED")
-        self.ch_msg = msg.data
+        self.log_info("CURRENT HEADING RECEIVED")
+        self.curr_heading = msg.data
 
     def recv_th(self, msg):
-        print("TARGET HEADING RECEIVED")
-        self.th_msg = msg.data
+        self.log_info("TARGET HEADING RECEIVED")
+        self.tar_heading = msg.data
 
     def recv_rw(self, msg):
-        self.rw_msg = msg.data
+        self.rel_wind = msg.data
 
     def recv_aw(self, msg):
-        self.aw_msg = msg.data
+        self.abs_wind = msg.data
 
     def recv_wv(self, msg):
         self.wv_msg = msg.data
 
+    def log_info(self, msg):
+        print(msg)
+        if self.log is not None:
+            self.log.write(msg)
+
+    def update_tar_status(self, msg):
+        self.target_reached = msg.data
+
     def publishCommands(self):
-        if self.usingRos:
-            # calculate sail position
-            self.calc_sail_angle()
-            # calculate rudder position if possible
-            if self.ch_msg is not None and self.th_msg is not None:
-                self.rudder_or = self.calc_rudder_angle(self.ch_msg, self.th_msg)
-            # Publish whichever messages have been set
-            if self.sail_or is not None:
-                # print("SAIL: %.1f" % self.sail_or)
-                self.pub_sail_heading.publish(self.sail_or)
-            if self.rudder_or is not None:
-                # print("RUDDER: %.1f" % self.rudder_or)
-                self.pub_rudder_heading.publish(self.rudder_or)
+        # calculate sail position
+        self.calc_sail_angle()
+        # calculate rudder position if possible
+        if self.curr_heading is not None and self.tar_heading is not None:
+            self.rudder_or = self.calc_rudder_angle(self.curr_heading, self.tar_heading)
+        # Publish whichever messages have been set
+        if self.sail_or is not None:
+            # print("SAIL: %.1f" % self.sail_or)
+            self.pub_sail_heading.publish(self.sail_or)
+        if self.rudder_or is not None:
+            # print("RUDDER: %.1f" % self.rudder_or)
+            self.pub_rudder_heading.publish(self.rudder_or)
 
 if __name__ == '__main__':
     Headings()

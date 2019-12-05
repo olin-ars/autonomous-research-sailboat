@@ -23,22 +23,38 @@ class ShortCoursePlanner:
         self.curr_pos = np.array([None, None])
         self.tar_pos = np.array([None, None])
         self.new_heading = None
-        self.target_reached = True  # won't be true until first target is received
+        self.target_reached = -1  # -1 = no target, 0 = not reached, 1 = reached
+        self.clock = 0
+        self.timeout = 100
 
         rospy.init_node('path_planner', anonymous=True)
 
-        rospy.Subscriber("current_heading", Float32, self.set_curr_heading, queue_size=1)
-        rospy.Subscriber("current_position", Point32, self.set_curr_pos, queue_size=1)
-        rospy.Subscriber("target_position", Point32, self.set_tar_pos, queue_size=1)
+        self.sub_ch = rospy.Subscriber("current_heading", Float32, self.set_curr_heading, queue_size=1)
+        self.sub_cp = rospy.Subscriber("current_position", Point32, self.set_curr_pos, queue_size=1)
+        self.sub_tp = rospy.Subscriber("target_position", Point32, self.set_tar_pos, queue_size=1)
 
         self.pub_new_heading = rospy.Publisher("target_heading", Float32, queue_size=1)
+        self.pub_status = rospy.Publisher("target_status", Int8, queue_size=1)
+
 
     def run(self):
         r = rospy.Rate(10)
         while not rospy.is_shutdown():
-            if not self.target_reached:
+            self.publish_target_status()
+            if self.target_reached = 0:
+                self.clock += 1
                 r.sleep()
                 self.publish_heading()
+            
+            if self.clock > self.timeout: # give up
+                self.target_reached = -1 # admit defeat
+                self.tar_pos = np.array([None, None]) # burn your dreams
+                self.clock = 0 # wish you could start over
+
+    def publish_target_status(self):
+        msg = Int8(self.target_reached)
+        self.pub_status.publish(msg)
+        print("STATUS: %i" % self.target_reached)
 
     def publish_heading(self):
         if self.curr_heading is not None and self.curr_pos.all() is not None and self.tar_pos.all() is not None:
@@ -56,14 +72,16 @@ class ShortCoursePlanner:
         if self.tar_pos.all() is not None:
             path = self.curr_pos - self.tar_pos
             if np.sqrt(path[0] ** 2 + path[1] ** 2) < 5:
-                self.target_reached = True
+                self.target_reached = 1
 
     def set_tar_pos(self, msg):
         x, y, _ = msg.x, msg.y, msg.z
         tp = np.array([x, y])  # temporary position variable
         if (self.tar_pos != tp).any():  # if target changes, reset the target_reached flag
             self.tar_pos = tp
-            self.target_reached = False
+            self.target_reached = 0
+        if (x, y) is (None, None): # if target is none, unset it
+            self.target_reached = -1
 
     def _get_polar_efficiency(self, alpha):
         """
