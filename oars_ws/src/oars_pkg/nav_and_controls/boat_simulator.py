@@ -35,11 +35,18 @@ class Boat:
 
     def run(self):
         r = rospy.Rate(10)
+        clock = 0
         while not rospy.is_shutdown():
-            while not self.target_reached:
+            while not self.target_reached and clock < 8:
                 r.sleep()
+                clock += 1
                 self.update()
-            print("Target reached!")
+            if self.target_reached:
+                print("Target reached!")
+            else: # This one gives up easily
+                print("Time limit reached.")
+                clock = 0
+                self.target_reached = True
             while self.target_reached:
                 pass
 
@@ -54,9 +61,9 @@ class Boat:
         cp_msg = Point32(x=self.curr_pos[0], y=self.curr_pos[1], z=0)
         self.pub_heading.publish(ch_msg)
         self.pub_position.publish(cp_msg)
+        print("CURRENT HEADING PUBLISHED")
 
         path = self.tar_pos - self.curr_pos  # calculate the path
-        print("Path", path)
         if np.sqrt(path[0] ** 2 + path[1] ** 2) < 5:  # re-calculate whether target has been reached.
             self.target_reached = True
 
@@ -79,6 +86,7 @@ class Boat:
             self.curr_heading = self.tar_heading
 
     def update_rudder(self, msg):
+        print("Rudder message received!")
         turn_effectiveness = 1 # instantaneous boat turn per degree of rudder turn
         self.controlled = True # show that boat direction is being controlled
         if self.curr_heading is None: # in case heading was not previously set, init at 0
@@ -86,9 +94,10 @@ class Boat:
         self.curr_heading -= msg.data * turn_effectiveness # adjust heading with rudder 
 
     def disp_wind(self):
-        print("WIND: %.2f, %.2f" % (np.cos(self.wind_dir * np.pi / 180), np.sin(self.wind_dir * np.pi / 180)))
+        print("WIND: %.2f" % self.wind_dir)
 
 
 if __name__ == '__main__':
     b = Boat()
     b.run()
+    exit()

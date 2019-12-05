@@ -104,3 +104,4 @@ class Repeater:
 
 if __name__ == '__main__':
     Repeater()
+    exit()

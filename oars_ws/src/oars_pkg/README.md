@@ -14,6 +14,8 @@
 
 `cd` into `oars_ws` and `catkin_make`.
 
+`source devel/setup.bash`. You may have to do this in both panes/tabs.
+
 Assuming you're in docker, and have tmux, this is probably a relatively good way to run things:
 
 Create 2 tabs/panes (`tmux`, then Ctrl+b Shift+5)
@@ -26,7 +28,7 @@ In the other tab/pane: (Ctrl+b right arrow key)
 
 `rosrun oars_pkg command_center.py`
 
-Now, in the first tab/pane, you can type commands to control the simulation. As of last commit, the nodes run by `boat.launch` will take care of everything except for the target position and wind direction. So, `tp=100,100 aw=0` will do the trick.
+Now, in the first tab/pane, you can type commands to control the simulation. As of last commit, the nodes run by `boat.launch` will take care of everything except for the target position and wind direction. So, `tp=100,100 aw=0` will do the trick. At any time, you can provide commands to update conditions (like setting a new target.)
 
 ## More on the command center
 

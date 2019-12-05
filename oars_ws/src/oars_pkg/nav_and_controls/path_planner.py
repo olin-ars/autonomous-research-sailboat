@@ -34,7 +34,7 @@ class ShortCoursePlanner:
         self.pub_new_heading = rospy.Publisher("target_heading", Float32, queue_size=1)
 
     def run(self):
-        r = rospy.Rate(2)
+        r = rospy.Rate(10)
         while not rospy.is_shutdown():
             if not self.target_reached:
                 r.sleep()
@@ -45,6 +45,7 @@ class ShortCoursePlanner:
             self.calc_heading()
             msg = Float32(self.new_heading)
             self.pub_new_heading.publish(msg)
+            print("TARGET HEADING PUBLISHED")
 
     def set_curr_heading(self, msg):
         self.curr_heading = msg.data
@@ -193,3 +194,4 @@ if __name__ == "__main__":
     # Initialize planner object
     planner = ShortCoursePlanner()
     planner.run()
+    exit()

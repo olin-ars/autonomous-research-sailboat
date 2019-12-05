@@ -1,7 +1,7 @@
 <launch>
-  <node name="repeater" pkg="oars_pkg" type="repeater.py" />
-  <node name="path_planner" pkg="oars_pkg" type="ros_path_planner.py" />
-  <node name="boat_sim" pkg="oars_pkg" type="boat_simulator.py" /> 
-  <node name="headings" pkg="oars_pkg" type="sail_rudder_control.py" />
+  <node name="repeater" pkg="oars_pkg" type="repeater.py" required="true"/>
+  <node name="path_planner" pkg="oars_pkg" type="path_planner.py" required="true"/>
+  <node name="boat_sim" pkg="oars_pkg" type="boat_simulator.py" output="screen" required="true"/> 
+  <node name="headings" pkg="oars_pkg" type="sail_rudder_control.py" output="screen" required="true"/>
   <!-- <node name="oops" pkg="oars_pkg" type="aruco.py" /> -->
 </launch>

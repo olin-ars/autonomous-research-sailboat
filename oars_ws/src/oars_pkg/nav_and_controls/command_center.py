@@ -162,3 +162,4 @@ class CommandCenter:
 
 if __name__ == '__main__':
     CommandCenter()
+    exit()

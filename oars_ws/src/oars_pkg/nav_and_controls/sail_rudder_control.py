@@ -23,10 +23,10 @@ class Headings:
             rospy.init_node('headings', anonymous = True)
             print('Init heading node.')
             # Create a subscriber to the command topic for each value
-            self.sub_current_heading = rospy.Subscriber('cmd_ch', Float32, self.recv_ch, queue_size = 1)
-            self.sub_target_heading = rospy.Subscriber('cmd_th', Float32, self.recv_th, queue_size = 1)
-            self.sub_rel_wind_dir = rospy.Subscriber('cmd_rw', Float32, self.recv_rw, queue_size = 1)
-            self.sub_abs_wind_dir = rospy.Subscriber('cmd_aw', Float32, self.recv_aw, queue_size = 1)
+            self.sub_current_heading = rospy.Subscriber('current_heading', Float32, self.recv_ch, queue_size = 1)
+            self.sub_target_heading = rospy.Subscriber('target_heading', Float32, self.recv_th, queue_size = 1)
+            self.sub_rel_wind_dir = rospy.Subscriber('rel_wind_dir', Float32, self.recv_rw, queue_size = 1)
+            self.sub_abs_wind_dir = rospy.Subscriber('abs_wind_dir', Float32, self.recv_aw, queue_size = 1)
             # self.sub_wind_velocity = rospy.Subscriber('cmd_wv', Float32, self.recv_wv, queue_size = 1)
 
             # Create a publisher to the corresponding topic for each value
@@ -45,6 +45,7 @@ class Headings:
                        target_angle + 360 - ref_angle,
                        target_angle - ref_angle - 360]
         difference = min(differences, key=abs)
+        print("Returning rudder angle: %.2f" % (difference * rudder_angle_scale))
         return difference * rudder_angle_scale
     
     def calc_sail_angle(self):
@@ -68,19 +69,21 @@ class Headings:
 
     # whenever a command is received, update the message being published by the repeater
     def recv_ch(self, msg):
-        self.ch_msg = msg
+        print("CURRENT HEADING RECEIVED")
+        self.ch_msg = msg.data
 
     def recv_th(self, msg):
-        self.th_msg = msg
+        print("TARGET HEADING RECEIVED")
+        self.th_msg = msg.data
 
     def recv_rw(self, msg):
-        self.rw_msg = msg
+        self.rw_msg = msg.data
 
     def recv_aw(self, msg):
-        self.aw_msg = msg
+        self.aw_msg = msg.data
 
     def recv_wv(self, msg):
-        self.wv_msg = msg
+        self.wv_msg = msg.data
 
     def publishCommands(self):
         if self.usingRos:
@@ -88,12 +91,15 @@ class Headings:
             self.calc_sail_angle()
             # calculate rudder position if possible
             if self.ch_msg is not None and self.th_msg is not None:
-                self.rudder_or = self.angle_diff(self.ch_msg, self.th_msg)
+                self.rudder_or = self.calc_rudder_angle(self.ch_msg, self.th_msg)
             # Publish whichever messages have been set
-            if self.sail_or != None:
+            if self.sail_or is not None:
+                # print("SAIL: %.1f" % self.sail_or)
                 self.pub_sail_heading.publish(self.sail_or)
-            if self.rudder_or != None:
+            if self.rudder_or is not None:
+                # print("RUDDER: %.1f" % self.rudder_or)
                 self.pub_rudder_heading.publish(self.rudder_or)
 
 if __name__ == '__main__':
     Headings()
+    exit()
