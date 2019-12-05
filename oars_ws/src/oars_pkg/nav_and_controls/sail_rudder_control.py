@@ -12,12 +12,12 @@ class Headings:
         self.ch_msg = None
         self.th_msg = None
         self.rw_msg = None
+        self.aw_msg = None
         # self.wv_msg = None
 
         # Heading vars
         self.sail_or = None
         self.rudder_or = None
-        self.aligned = None
 
         if self.usingRos:
             rospy.init_node('headings', anonymous = True)
@@ -26,17 +26,45 @@ class Headings:
             self.sub_current_heading = rospy.Subscriber('cmd_ch', Float32, self.recv_ch, queue_size = 1)
             self.sub_target_heading = rospy.Subscriber('cmd_th', Float32, self.recv_th, queue_size = 1)
             self.sub_rel_wind_dir = rospy.Subscriber('cmd_rw', Float32, self.recv_rw, queue_size = 1)
+            self.sub_abs_wind_dir = rospy.Subscriber('cmd_aw', Float32, self.recv_aw, queue_size = 1)
             # self.sub_wind_velocity = rospy.Subscriber('cmd_wv', Float32, self.recv_wv, queue_size = 1)
 
             # Create a publisher to the corresponding topic for each value
-            self.pub_sail_heading = rospy.Publisher('/sail_heading', Float32, queue_size = 5)
-            self.pub_rudder_heading = rospy.Publisher('/rudder_heading', Float32, queue_size = 5)
+            self.pub_sail_heading = rospy.Publisher('sail_position', Float32, queue_size = 5)
+            self.pub_rudder_heading = rospy.Publisher('rudder_position', Float32, queue_size = 5)
 
-            r = rospy.Rate(20)
+            r = rospy.Rate(10)
             while not rospy.is_shutdown():
                 # publish whichever values have been set
                 self.publishCommands()
                 r.sleep()
+                
+    def calc_rudder_angle(self, ref_angle, target_angle):
+        rudder_angle_scale = .25 # degrees of rudder turn per desired turn
+        differences = [target_angle - ref_angle,
+                       target_angle + 360 - ref_angle,
+                       target_angle - ref_angle - 360]
+        difference = min(differences, key=abs)
+        return difference * rudder_angle_scale
+    
+    def calc_sail_angle(self):
+        # figure out relative wind angle
+        if self.rw_msg is not None:
+            rel_wind = self.rw_msg
+        elif self.aw_msg is not None and self.ch_msg is not None:
+            rel_wind = (self.aw_msg - self.ch_msg) % 360
+        else:
+            return
+
+        if rel_wind > 180: # want a range from 0-180, direction doesn't matter
+            rel_wind = 360 - 180
+
+        if rel_wind < 45: # in "irons" - you're fucked, but might as well have the sail in
+            self.sail_or = 0
+        elif rel_wind > 135: # heading downwind - sail all the way out
+            self.sail_or = 90
+        else:
+            self.sail_or = rel_wind - 45 # ideal sail position
 
     # whenever a command is received, update the message being published by the repeater
     def recv_ch(self, msg):
@@ -44,36 +72,23 @@ class Headings:
 
     def recv_th(self, msg):
         self.th_msg = msg
-        if (abs(self.ch_msg - self.th_msg) > 5):
-            self.aligned = False
-        else:
-            self.aligned = True
 
     def recv_rw(self, msg):
         self.rw_msg = msg
-        if (self.th_msg > 180):
-            if (self.rw_msg > 300 or self.rw_msg < 55):
-                self.sail_or = self.rw_msg + 5
-            elif (self.rw_msg < 235 or self.rw_msg > 120):
-                self.sail_or = self.rw_msg - 5
-        else:
-            if (self.rw_msg > 300 or self.rw_msg < 55):
-                self.sail_or = self.rw_msg - 5
-            elif (self.rw_msg < 235 or self.rw_msg > 120):
-                self.sail_or = self.rw_msg + 5
-        if self.aligned:
-            self.rudder_or = self.sail_or
-        else:
-            if (self.th_msg - self.ch_msg) > 0:
-                self.rudder_or = 180
-            else:
-                self.rudder_or = 0
+
+    def recv_aw(self, msg):
+        self.aw_msg = msg
 
     def recv_wv(self, msg):
         self.wv_msg = msg
 
     def publishCommands(self):
         if self.usingRos:
+            # calculate sail position
+            self.calc_sail_angle()
+            # calculate rudder position if possible
+            if self.ch_msg is not None and self.th_msg is not None:
+                self.rudder_or = self.angle_diff(self.ch_msg, self.th_msg)
             # Publish whichever messages have been set
             if self.sail_or != None:
                 self.pub_sail_heading.publish(self.sail_or)

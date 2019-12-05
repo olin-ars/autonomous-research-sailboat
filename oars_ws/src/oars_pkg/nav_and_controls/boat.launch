@@ -1,5 +1,0 @@
-<launch>
-  <node name="repeater" pkg="oars_pkg" type="repeater.py" />
-  <node name="path_planner" pkg="oars_pkg" type="ros_path_planner.py" />
-  <node name="boat_sim" pkg="oars_pkg" type="boat_simulator.py" />
-</launch>

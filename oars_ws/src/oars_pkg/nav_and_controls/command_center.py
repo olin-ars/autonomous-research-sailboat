@@ -56,45 +56,73 @@ class CommandCenter:
             # instr[0] is the value name to set, instr[1] is its value
             instr = command.split('=')
 
-            if instr[0] in ['current_position', 'curr_pos', 'cp']:  # check if command matches
-                values = instr[1].split(',')                       # split x and y coords
-                if len(values) != 2:                               # make sure 2 were provided
-                    print("Wrong number of arguments for current_position: expected 2.\n")
-                    continue
-                x = float(values[0])
-                y = float(values[1])
-                print("current_position set to (%f, %f)." % (x, y))
-                self.cp_msg = Point32(x, y, 0)  # create a message and set it in the CommandCenter
+            if instr[0] in ['current_position', 'current_pos', 'curr_pos', 'cp']:  # check if command matches
+                if instr[1].lower() in ['n', 'x']:
+                    self.cp_msg = None
+                    print("current_position unset.")
+                else:
+                    values = instr[1].split(',')                       # split x and y coords
+                    if len(values) != 2:                               # make sure 2 were provided
+                        print("Wrong number of arguments for current_position: expected 2.\n")
+                        continue
+                    x = float(values[0])
+                    y = float(values[1])
+                    print("current_position set to (%f, %f)." % (x, y))
+                    self.cp_msg = Point32(x, y, 0)  # create a message and set it in the CommandCenter
 
-            elif instr[0] in ['target_position', 'target_pos', 'tp']:
-                values = instr[1].split(',')
-                if len(values) != 2:
-                    print("Wrong number of arguments for target_position: expected 2.\n")
-                    continue
-                x = float(values[0])
-                y = float(values[1])
-                print("target_position set to (%f, %f)." % (x, y))
-                self.tp_msg = Point32(x, y, 0)
+            elif instr[0] in ['target_position', 'target_pos', 'tar_pos', 'tp']:
+                if instr[1].lower() in ['n', 'x']:
+                    self.tp_msg = None
+                    print("target_position unset.")
+                else:
+                    values = instr[1].split(',')
+                    if len(values) != 2:
+                        print("Wrong number of arguments for target_position: expected 2.\n")
+                        continue
+                    x = float(values[0])
+                    y = float(values[1])
+                    print("target_position set to (%f, %f)." % (x, y))
+                    self.tp_msg = Point32(x, y, 0)
 
             elif instr[0] in ['current_heading', 'curr_heading', 'ch']:
-                print("current_heading set to %s." % instr[1])
-                self.ch_msg = Float32(float(instr[1]))
+                if instr[1].lower() in ['n', 'x']:
+                    self.ch_msg = None
+                    print("current_heading unset.")
+                else:
+                    print("current_heading set to %s." % instr[1])
+                    self.ch_msg = Float32(float(instr[1]))
 
-            elif instr[0] in ['target_heading', 'th']:
-                print("target_heading set to %s." % instr[1])
-                self.th_msg = Float32(float(instr[1]))
+            elif instr[0] in ['target_heading', 'tar_heading', 'th']:
+                if instr[1].lower() in ['n', 'x']:
+                    self.th_msg = None
+                    print("target_heading unset.")
+                else:
+                    print("target_heading set to %s." % instr[1])
+                    self.th_msg = Float32(float(instr[1]))
 
-            elif instr[0] in ['abs_wind_dir', 'abs_wind', 'aw']:
-                print("abs_wind_dir set to %s." % instr[1])
-                self.aw_msg = Float32(float(instr[1]))
+            elif instr[0] in ['abs_wind_dir', 'absolute_wind', 'abs_wind', 'aw']:
+                if instr[1].lower() in ['n', 'x']:
+                    self.aw_msg = None
+                    print("abs_wind_dir unset.")
+                else:
+                    print("abs_wind_dir set to %s." % instr[1])
+                    self.aw_msg = Float32(float(instr[1]))
 
-            elif instr[0] in ['rel_wind_dir', 'rel_wind', 'rw']:
-                print("rel_wind_dir set to %s." % instr[1])
-                self.rw_msg = Float32(float(instr[1]))
+            elif instr[0] in ['rel_wind_dir', 'relative_wind', 'rel_wind', 'rw']:
+                if instr[1].lower() in ['n', 'x']:
+                    self.rw_msg = None
+                    print("rel_wind_dir unset.")
+                else:
+                    print("rel_wind_dir set to %s." % instr[1])
+                    self.rw_msg = Float32(float(instr[1]))
 
-            elif instr[0] in ['wind_velocity', 'wind_vel', 'v']:
-                print("wind_velocity set to %s." % instr[1])
-                self.wv_msg = Float32(float(instr[1]))
+            elif instr[0] in ['wind_velocity', 'wind_vel', 'wv', 'v']:
+                if instr[1].lower() in ['n', 'x']:
+                    self.wv_msg = None
+                    print("wind_velocity unset.")
+                else:
+                    print("wind_velocity set to %s." % instr[1])
+                    self.wv_msg = Float32(float(instr[1]))
 
             # no command names were matched for a given command
             else:
