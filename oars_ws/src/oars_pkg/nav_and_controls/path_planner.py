@@ -10,7 +10,7 @@ Read the paper here: https://www.dora.dmu.ac.uk/bitstream/handle/2086/7364/thesi
 
 import numpy as np
 import rospy
-from std_msgs.msg import Float32
+from std_msgs.msg import Float32, Int8
 from geometry_msgs.msg import Point32
 
 
@@ -31,7 +31,8 @@ class ShortCoursePlanner:
 
         self.sub_ch = rospy.Subscriber("current_heading", Float32, self.set_curr_heading, queue_size=1)
         self.sub_cp = rospy.Subscriber("current_position", Point32, self.set_curr_pos, queue_size=1)
-        self.sub_tp = rospy.Subscriber("target_position", Point32, self.set_tar_pos, queue_size=1)
+        # draws from command topic, so target is only set once
+        self.sub_tp = rospy.Subscriber("cmd_tp", Point32, self.set_tar_pos, queue_size=1)
 
         self.pub_new_heading = rospy.Publisher("target_heading", Float32, queue_size=1)
         self.pub_status = rospy.Publisher("target_status", Int8, queue_size=1)
@@ -41,27 +42,25 @@ class ShortCoursePlanner:
         r = rospy.Rate(10)
         while not rospy.is_shutdown():
             self.publish_target_status()
-            if self.target_reached = 0:
+            if self.target_reached == 0:
                 self.clock += 1
                 r.sleep()
                 self.publish_heading()
             
-            if self.clock > self.timeout: # give up
-                self.target_reached = -1 # admit defeat
-                self.tar_pos = np.array([None, None]) # burn your dreams
-                self.clock = 0 # wish you could start over
+            if self.clock > self.timeout:  # give up
+                self.target_reached = -1  # admit defeat
+                self.tar_pos = np.array([None, None])  # burn your dreams
+                self.clock = 0  # wish you could start over
 
     def publish_target_status(self):
         msg = Int8(self.target_reached)
         self.pub_status.publish(msg)
-        print("STATUS: %i" % self.target_reached)
 
     def publish_heading(self):
         if self.curr_heading is not None and self.curr_pos.all() is not None and self.tar_pos.all() is not None:
             self.calc_heading()
             msg = Float32(self.new_heading)
             self.pub_new_heading.publish(msg)
-            print("TARGET HEADING PUBLISHED")
 
     def set_curr_heading(self, msg):
         self.curr_heading = msg.data

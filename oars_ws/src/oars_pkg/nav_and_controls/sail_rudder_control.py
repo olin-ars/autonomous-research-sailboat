@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import rospy
-from std_msgs.msg import Float32
+from std_msgs.msg import Float32, Int8
 from geometry_msgs.msg import Point32
 
 class Headings:
@@ -21,8 +21,6 @@ class Headings:
         self.sail_or = None
         self.rudder_or = None
 
-        self.log = open("sail_rudder_control_log.txt", "a")
-
         if self.usingRos:
             rospy.init_node('headings', anonymous = True)
             print('Init heading node.')
@@ -38,9 +36,6 @@ class Headings:
             self.pub_sail_heading = rospy.Publisher('sail_position', Float32, queue_size = 1)
             self.pub_rudder_heading = rospy.Publisher('rudder_position', Float32, queue_size = 1)
 
-            # if self.log is not None:
-            self.log.write("_" * 80)
-
             r = rospy.Rate(10)
             while not rospy.is_shutdown():
                 while self.target_reached == 0: # run if there's an unreached target
@@ -49,9 +44,6 @@ class Headings:
                     r.sleep()
                 while self.target_reached != 0: # wait for a new goal
                     pass
-                
-            if self.log is not None:
-                self.log.close()
 
     def calc_rudder_angle(self, ref_angle, target_angle):
         rudder_angle_scale = .25 # degrees of rudder turn per desired turn
@@ -59,7 +51,6 @@ class Headings:
                        target_angle + 360 - ref_angle,
                        target_angle - ref_angle - 360]
         difference = min(differences, key=abs)
-        self.log_info("Returning rudder angle: %.2f" % (difference * rudder_angle_scale))
         return difference * rudder_angle_scale
     
     def calc_sail_angle(self):
@@ -83,11 +74,9 @@ class Headings:
 
     # whenever a command is received, update the message being published by the repeater
     def recv_ch(self, msg):
-        self.log_info("CURRENT HEADING RECEIVED")
         self.curr_heading = msg.data
 
     def recv_th(self, msg):
-        self.log_info("TARGET HEADING RECEIVED")
         self.tar_heading = msg.data
 
     def recv_rw(self, msg):
@@ -98,11 +87,6 @@ class Headings:
 
     def recv_wv(self, msg):
         self.wv_msg = msg.data
-
-    def log_info(self, msg):
-        print(msg)
-        if self.log is not None:
-            self.log.write(msg)
 
     def update_tar_status(self, msg):
         self.target_reached = msg.data
@@ -115,10 +99,10 @@ class Headings:
             self.rudder_or = self.calc_rudder_angle(self.curr_heading, self.tar_heading)
         # Publish whichever messages have been set
         if self.sail_or is not None:
-            # print("SAIL: %.1f" % self.sail_or)
+            print("SAIL: %.1f" % self.sail_or)
             self.pub_sail_heading.publish(self.sail_or)
         if self.rudder_or is not None:
-            # print("RUDDER: %.1f" % self.rudder_or)
+            print("RUDDER: %.1f" % self.rudder_or)
             self.pub_rudder_heading.publish(self.rudder_or)
 
 if __name__ == '__main__':

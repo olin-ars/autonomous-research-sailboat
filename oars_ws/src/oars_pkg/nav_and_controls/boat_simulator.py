@@ -2,14 +2,13 @@
 
 import numpy as np
 import rospy
-from std_msgs.msg import Float32
+from std_msgs.msg import Float32, Int8
 from geometry_msgs.msg import Point32
 
 
 class Boat:
     def __init__(self):
 
-        self.log = open("boat_sim_log.txt", "a")
         self.wind_dir = 0
         self.tar_pos = np.array([None, None])
         self.tar_heading = None
@@ -38,9 +37,6 @@ class Boat:
     def run(self):
         r = rospy.Rate(10)
 
-        # if self.log is not None:
-        self.log.write("_" * 80)
-
         while not rospy.is_shutdown():
             while self.target_reached == 0:
                 self.update()
@@ -53,21 +49,19 @@ class Boat:
             while self.target_reached != 0: # wait for a new goal
                 pass
 
-        if self.log is not None:
-            self.log.close()
-
     def update(self):
         if self.curr_heading is not None and self.curr_pos is not None:
             self.curr_pos += 2 * np.array([np.cos(self.curr_heading * np.pi/180), np.sin(self.curr_heading * np.pi/180)])
-            self.log_info("NEW Position: %.2f, %.2f\tHeading: %.2f" % (self.curr_pos[0], self.curr_pos[1], self.curr_heading))
+            print("NEW Position: %.2f, %.2f\tHeading: %.2f" % (self.curr_pos[0], self.curr_pos[1], self.curr_heading))
 
+            # was used for logging path
             self.xs.append(self.curr_pos[0])
             self.ys.append(self.curr_pos[1])
+            
             ch_msg = Float32(self.curr_heading)
             cp_msg = Point32(x=self.curr_pos[0], y=self.curr_pos[1], z=0)
             self.pub_heading.publish(ch_msg)
             self.pub_position.publish(cp_msg)
-            self.log_info("CURRENT HEADING PUBLISHED")
 
             # HANDLED BY PATH PLANNER
             # path = self.tar_pos - self.curr_pos  # calculate the path
@@ -84,7 +78,7 @@ class Boat:
         # if (self.tar_pos != tp).any():  # if target changes, reset the target_reached flag
         #     self.tar_pos = tp
         #     self.target_reached = False
-        #     self.log_info("TARGET: %.2f, %.2f\t CURRENT: %.2f, %.2f" % (x, y, self.curr_pos[0], self.curr_pos[1]))
+        #     print("TARGET: %.2f, %.2f\t CURRENT: %.2f, %.2f" % (x, y, self.curr_pos[0], self.curr_pos[1]))
 
     def update_tar_heading(self, msg):
         # if no data is coming from rudder controller, just jump to desired heading
@@ -94,23 +88,16 @@ class Boat:
             self.curr_heading = self.tar_heading
 
     def update_rudder(self, msg):
-        self.log_info("Rudder message received!")
         turn_effectiveness = 1 # instantaneous boat turn per degree of rudder turn
         self.controlled = True # show that boat direction is being controlled
-        if self.curr_heading is None: # in case heading was not previously set, init at 0
-            self.curr_heading = 0
-        self.curr_heading -= msg.data * turn_effectiveness # adjust heading with rudder 
+        if self.curr_heading is not None:
+            self.curr_heading += msg.data * turn_effectiveness # adjust heading with rudder 
 
     def update_tar_status(self, msg):
         self.target_reached = msg.data
 
     def disp_wind(self):
         print("WIND: %.2f" % self.wind_dir)
-
-    def log_info(self, msg):
-        print(msg)
-        if self.log is not None:
-            self.log.write(msg)
 
 
 if __name__ == '__main__':
